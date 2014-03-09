@@ -1,0 +1,98 @@
+<html>
+<body>
+<video id="webcam"></video>
+<canvas id="feed"></canvas>
+<canvas id="display"></canvas>
+
+<script>
+
+// Override the function with all the posibilities
+navigator.getUserMedia ||
+        (navigator.getUserMedia = navigator.mozGetUserMedia ||
+        navigator.webkitGetUserMedia || navigator.msGetUserMedia);
+	
+    window.requestAnimationFrame ||
+        (window.requestAnimationFrame = window.webkitRequestAnimationFrame || 
+            window.mozRequestAnimationFrame || 
+            window.oRequestAnimationFrame || 
+            window.msRequestAnimationFrame || 
+            function( callback ){
+                window.setTimeout(callback, 1000 / 60);
+            });
+
+var getVideo = true;
+var getAudio = false;
+
+var video = document.getElementById('webcam');
+
+var  feed = document.getElementById('feed'),
+     feedContext = feed.getContext('2d'),
+     display = document.getElementById('display'),
+     displayContext = display.getContext('2d');
+ 
+ <!-- callbacks for getusermedia -->
+   function onSuccess(stream) {
+        var videoSource;
+        var audioContext;
+        var mediaStreamSource;
+
+        if (getVideo) {
+            if (window.webkitURL) {
+                videoSource = window.webkitURL.createObjectURL(stream);
+            } else {
+                videoSource = stream;
+            }
+
+            video.autoplay = true;
+            video.src = videoSource;
+
+			
+			display.width = feed.width = 320;
+            display.height = feed.height = 240;
+
+            streamFeed();
+        }
+    }
+
+    function onError() {
+        alert('There has been a problem retreiving the streams - are you running on file:/// or did you disallow access?');
+    } 
+	
+	function ProcessImage(data) {
+		for (var i=0;i<data.length;i+=4)
+		{
+			// Delete GB channel
+			data[i+1]=0;
+			data[i+2]=0;
+		}
+		
+		return data;
+    }
+ 
+  function streamFeed() {
+        requestAnimationFrame(streamFeed);
+        feedContext.drawImage(video, 0, 0, display.width, display.height);
+        imageData = feedContext.getImageData(0, 0, display.width, display.height);
+
+        imageData.data = ProcessImage(imageData.data);
+
+        displayContext.putImageData(imageData, 0, 0);
+    }
+ 
+ 
+function requestStreams() {
+    if (navigator.getUserMedia) {
+        navigator.getUserMedia({video: getVideo, audio: getAudio}, 
+		     onSuccess, onError);
+        } else {
+            alert('getUserMedia is not supported in this browser.');
+        }
+}
+
+// Start execution
+requestStreams();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+<html>
+<body>
+<script>
+
+navigator.getUserMedia ||
+        (navigator.getUserMedia = navigator.mozGetUserMedia ||
+        navigator.webkitGetUserMedia || navigator.msGetUserMedia);
+function checkUserMedia() {
+if (hasGetUserMedia()) {
+  alert('getUserMedia() IS supported in your browser');
+} else {
+  alert('getUserMedia() is not supported in your browser');
+}
+}
+function hasGetUserMedia() {
+  // Note: Opera is unprefixed.
+  return !!(navigator.getUserMedia);
+}
+
+
+</script>
+<button type="button" onclick="checkUserMedia()">
+    Check GetUserMedia support
+</button>
+
+
+</body>
+</html>
